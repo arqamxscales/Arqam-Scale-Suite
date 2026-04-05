@@ -18,6 +18,14 @@ new Worker(
 const app = express();
 app.use(express.json());
 
+app.get("/", (_req, res) => {
+  res.json({
+    service: "trigger-bg",
+    status: "ok",
+    routes: ["GET /health", "POST /enqueue"]
+  });
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "trigger-bg" });
 });

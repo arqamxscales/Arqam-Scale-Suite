@@ -6,6 +6,14 @@ app.use(express.json());
 
 const links = new Map();
 
+app.get("/", (_req, res) => {
+  res.json({
+    service: "dub-links",
+    status: "ok",
+    routes: ["GET /health", "POST /shorten", "GET /:slug"]
+  });
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "dub-links" });
 });

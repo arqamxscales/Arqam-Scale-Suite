@@ -16,7 +16,7 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 
 ## 🛠 Global Setup
 1. Clone: `git clone https://github.com/arqamxscales/Arqam-Scale-Suite`
-2. Run all services: `docker-compose up -d`
+2. Run all services: `docker compose up -d --build`
 
 ## ✅ Current Scaffold Status
 - Monorepo folders created for all 6 services.
@@ -26,6 +26,8 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 	- `dub-links` (basic short-link API)
 	- `pocket-base` (Go + SQLite auth/notes/realtime API)
 	- `paper-cups` (WebSocket chat relay)
+	- `coolify-paas` (PaaS control-plane stub)
+	- `hopp-test` (API testing workspace stub)
 
 ## 📌 GitHub Push (after creating remote repo)
 ```bash

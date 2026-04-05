@@ -59,6 +59,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /", app.root)
 	mux.HandleFunc("GET /health", app.health)
 	mux.HandleFunc("POST /auth/register", app.register)
 	mux.HandleFunc("POST /auth/login", app.login)
@@ -99,7 +100,25 @@ func runMigrations(db *sql.DB) error {
 }
 
 func (a *App) health(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":  "ok",
+		"service": "pocket-base",
+	})
+}
+
+func (a *App) root(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"service": "pocket-base",
+		"status":  "ok",
+		"routes": []string{
+			"GET /health",
+			"POST /auth/register",
+			"POST /auth/login",
+			"GET /api/notes",
+			"POST /api/notes",
+			"GET /api/subscribe",
+		},
+	})
 }
 
 func (a *App) register(w http.ResponseWriter, r *http.Request) {

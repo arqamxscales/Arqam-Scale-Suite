@@ -33,6 +33,18 @@ services:
     build: ./paper-cups
     ports: ["4000:4000"]
 
+  # Coolify-style PaaS control plane
+  coolify-paas:
+    platform: linux/arm64
+    build: ./coolify-paas
+    ports: ["3002:3002"]
+
+  # Hoppscotch-style API testing workspace
+  hopp-test:
+    platform: linux/arm64
+    build: ./hopp-test
+    ports: ["3003:3003"]
+
   # Infrastructure Dependencies
   redis:
     platform: linux/arm64

@@ -6,6 +6,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (_req, res) => {
+  res.json({
+    service: "paper-cups",
+    status: "ok",
+    routes: ["GET /health", "WS /ws"]
+  });
+});
+
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "paper-cups" });
 });
