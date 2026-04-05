@@ -1,4 +1,4 @@
-# Arqam-Scale-Suite 🚀
+# Arqam-Scale-Suite 
 **Developer:** @arqamxscales  
 **Focus:** AI Infrastructure, Fintech Scalability, & Open Source Tooling.
 
@@ -29,11 +29,3 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 	- `coolify-paas` (PaaS control-plane stub)
 	- `hopp-test` (API testing workspace stub)
 
-## 📌 GitHub Push (after creating remote repo)
-```bash
-git add .
-git commit -m "chore: initialize Arqam-Scale-Suite monorepo scaffold"
-git branch -M main
-git remote add origin https://github.com/arqamxscales/Arqam-Scale-Suite.git
-git push -u origin main
-```
