@@ -41,6 +41,7 @@ expect_code "coolify-paas health" "200" "http://localhost:3002/health"
 expect_code "hopp-test health" "200" "http://localhost:3003/health"
 expect_code "paper-cups health" "200" "http://localhost:4000/health"
 expect_code "pocket-base health" "200" "http://localhost:8080/health"
+expect_code "gateway health" "200" "http://localhost/healthz"
 
 echo "==> Checking trigger-bg auth + enqueue"
 unauth_code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST http://localhost:3001/api/jobs -H 'Content-Type: application/json' -d '{"name":"smoke","payload":{}}')
@@ -103,6 +104,14 @@ fi
 echo "==> Checking coolify-paas + hopp-test functional endpoints"
 expect_code "coolify-paas apps" "200" "http://localhost:3002/apps"
 expect_code "hopp-test workspace" "200" "http://localhost:3003/workspace"
+
+echo "==> Checking gateway reverse-proxy routes"
+expect_code "gateway trigger route" "200" "http://localhost/trigger/health"
+expect_code "gateway dub route" "200" "http://localhost/dub/health"
+expect_code "gateway pocket route" "200" "http://localhost/pocket/health"
+expect_code "gateway paper route" "200" "http://localhost/paper/health"
+expect_code "gateway coolify route" "200" "http://localhost/coolify/health"
+expect_code "gateway hopp route" "200" "http://localhost/hopp/health"
 
 echo
 if [[ "$failures" -eq 0 ]]; then

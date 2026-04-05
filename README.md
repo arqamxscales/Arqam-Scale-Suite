@@ -16,7 +16,9 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 
 ## 🛠 Global Setup
 1. Clone: `git clone https://github.com/arqamxscales/Arqam-Scale-Suite`
-2. Run all services: `docker compose up -d --build`
+2. Copy env template: `cp .env.example .env`
+3. Set your secrets in `.env`
+4. Run all services: `docker compose up -d --build`
 
 ## ✅ Current Scaffold Status
 - Monorepo folders created for all 6 services.
@@ -26,11 +28,18 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 	- service healthchecks
 	- dependency health-gating where needed
 	- persistent Postgres volume for `dub-links`
+- Deep production pass applied:
+	- env-based secret strategy (`.env.example` + runtime interpolation)
+	- structured request logs (JSON) for Node services
+	- API rate limiting across public endpoints
+	- optional WebSocket token enforcement for `paper-cups`
+	- reverse proxy gateway (`nginx`) at `http://localhost`
+	- CI pipeline for build + smoke test on push/PR (`.github/workflows/ci.yml`)
 - Current service capabilities:
 	- `trigger-bg` (authenticated enqueue + job lifecycle/status/result APIs)
 	- `dub-links` (persistent Postgres short links + API key auth + redirect analytics)
 	- `pocket-base` (Go + SQLite auth/notes/realtime API)
-	- `paper-cups` (WebSocket chat relay)
+	- `paper-cups` (WebSocket chat relay + optional token auth)
 	- `coolify-paas` (PaaS control-plane stub)
 	- `hopp-test` (API testing workspace stub)
 
@@ -59,8 +68,17 @@ This verifies health + key workflows for all services:
 - `dub-links`: create link + fetch + redirect
 - `pocket-base`: register + login
 - `coolify-paas`, `hopp-test`, `paper-cups`: service endpoints
+- `gateway`: reverse-proxy route checks (`/trigger`, `/dub`, `/pocket`, `/paper`, `/coolify`, `/hopp`)
 
-### 4) View logs if something fails
+### 4) Gateway quick checks
+
+```bash
+curl http://localhost/healthz
+curl http://localhost/trigger/health
+curl http://localhost/dub/health
+```
+
+### 5) View logs if something fails
 
 ```bash
 docker compose logs -f

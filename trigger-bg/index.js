@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { Queue, Worker, QueueEvents } from "bullmq";
 import IORedis from "ioredis";
 
@@ -59,7 +60,25 @@ worker.on("error", (error) => {
 });
 
 const app = express();
+app.set("trust proxy", 1);
+app.use(requestLogger("trigger-bg"));
 app.use(express.json());
+
+const readLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.TRIGGER_READ_RATE_LIMIT || 300),
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.TRIGGER_WRITE_RATE_LIMIT || 60),
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use("/api", readLimiter);
 
 app.get("/", (_req, res) => {
   res.json({
@@ -95,7 +114,7 @@ app.get("/health", async (_req, res) => {
   }
 });
 
-app.post("/api/jobs", requireApiKey, async (req, res, next) => {
+app.post("/api/jobs", writeLimiter, requireApiKey, async (req, res, next) => {
   try {
     const payload = req.body?.payload ?? {};
     const name = normalizeJobName(req.body?.name);
@@ -248,5 +267,24 @@ function toJobSummary(job) {
     createdAt: toIso(job.timestamp),
     finishedOn: toIso(job.finishedOn),
     processedOn: toIso(job.processedOn)
+  };
+}
+
+function requestLogger(service) {
+  return (req, res, next) => {
+    const started = Date.now();
+    res.on("finish", () => {
+      const log = {
+        ts: new Date().toISOString(),
+        service,
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        durationMs: Date.now() - started,
+        ip: req.ip
+      };
+      console.log(JSON.stringify(log));
+    });
+    next();
   };
 }

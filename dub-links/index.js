@@ -1,8 +1,11 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import crypto from "node:crypto";
 import { Pool } from "pg";
 
 const app = express();
+app.set("trust proxy", 1);
+app.use(requestLogger("dub-links"));
 app.use(express.json());
 
 const pool = new Pool({
@@ -29,6 +32,22 @@ const createIndexSql = `
 await waitForDatabase();
 await pool.query(createTableSql);
 await pool.query(createIndexSql);
+
+const readLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.DUB_READ_RATE_LIMIT || 300),
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.DUB_WRITE_RATE_LIMIT || 60),
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use(readLimiter);
 
 app.get("/", (_req, res) => {
   res.json({
@@ -58,7 +77,7 @@ app.get("/api/links", async (_req, res) => {
   res.json({ items: rows.map(formatLink) });
 });
 
-app.post("/api/links", requireApiKey, async (req, res) => {
+app.post("/api/links", writeLimiter, requireApiKey, async (req, res) => {
   const destinationUrl = String(req.body?.url || "").trim();
   const requestedSlug = normalizeSlug(req.body?.slug);
   const title = normalizeOptionalText(req.body?.title);
@@ -102,7 +121,7 @@ app.get("/api/links/:slug", async (req, res) => {
   res.json(link);
 });
 
-app.patch("/api/links/:slug", requireApiKey, async (req, res) => {
+app.patch("/api/links/:slug", writeLimiter, requireApiKey, async (req, res) => {
   const slug = req.params.slug;
   const existing = await getLink(slug);
   if (!existing) {
@@ -129,7 +148,7 @@ app.patch("/api/links/:slug", requireApiKey, async (req, res) => {
   res.json(formatLink(rows[0]));
 });
 
-app.delete("/api/links/:slug", requireApiKey, async (req, res) => {
+app.delete("/api/links/:slug", writeLimiter, requireApiKey, async (req, res) => {
   const result = await pool.query(`DELETE FROM links WHERE slug = $1`, [req.params.slug]);
   if (result.rowCount === 0) {
     return res.status(404).json({ error: "not found" });
@@ -249,5 +268,24 @@ async function waitForDatabase() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
+}
+
+function requestLogger(service) {
+  return (req, res, next) => {
+    const started = Date.now();
+    res.on("finish", () => {
+      const log = {
+        ts: new Date().toISOString(),
+        service,
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        durationMs: Date.now() - started,
+        ip: req.ip
+      };
+      console.log(JSON.stringify(log));
+    });
+    next();
+  };
 }
 
