@@ -1,0 +1,60 @@
+# OS
+.DS_Store
+
+# Node
+**/node_modules
+
+# Build artifacts
+**/dist
+**/build
+
+# Go
+**/bin
+**/*.test
+
+# Local data
+pocket-base/pb_data
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Secrets / API keys / credentials
+secrets/
+**/secrets/
+*.secret
+*.secrets
+*.credentials
+credentials.json
+service-account.json
+serviceAccountKey.json
+
+# Cloud / platform credential files
+.aws/
+.azure/
+.gcloud/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+
+# Private keys, certs, signing material
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Tooling auth files
+.npmrc
+.pypirc
+
+# Logs that may contain tokens
+*.log
+logs/

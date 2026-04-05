@@ -1,0 +1,14 @@
+{
+  "name": "trigger-bg",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "bullmq": "^5.34.10",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2"
+  }
+}

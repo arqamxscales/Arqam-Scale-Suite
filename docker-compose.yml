@@ -1,0 +1,46 @@
+services:
+  # Background Worker (Trigger-style)
+  trigger-bg:
+    platform: linux/arm64
+    build: ./trigger-bg
+    ports: ["3001:3001"]
+    environment:
+      - REDIS_URL=redis://redis:6379
+
+  # Link Shortener (Dub-style)
+  dub-links:
+    platform: linux/arm64
+    build: ./dub-links
+    ports: ["3000:3000"]
+    depends_on:
+      - db-links
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db-links:5432/dublinks?sslmode=disable
+
+  # Backend-as-a-Service (PocketBase-style)
+  pocket-base:
+    platform: linux/arm64
+    build: ./pocket-base
+    ports: ["8080:8080"]
+    volumes:
+      - ./pocket-base/pb_data:/pb/pb_data
+    environment:
+      - JWT_SECRET=change-me
+
+  # Real-time Chat (Papercups-style)
+  paper-cups:
+    platform: linux/arm64
+    build: ./paper-cups
+    ports: ["4000:4000"]
+
+  # Infrastructure Dependencies
+  redis:
+    platform: linux/arm64
+    image: redis:alpine
+  db-links:
+    platform: linux/arm64
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dublinks
