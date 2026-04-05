@@ -13,9 +13,12 @@ services:
     build: ./dub-links
     ports: ["3000:3000"]
     depends_on:
-      - db-links
+      db-links:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgres://postgres:password@db-links:5432/dublinks?sslmode=disable
+      - DUB_API_KEY=change-me
+      - PUBLIC_BASE_URL=http://localhost:3000
 
   # Backend-as-a-Service (PocketBase-style)
   pocket-base:
@@ -52,7 +55,17 @@ services:
   db-links:
     platform: linux/arm64
     image: postgres:alpine
+    volumes:
+      - db-links-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: dublinks
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dublinks"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-links-data:
