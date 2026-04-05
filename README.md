@@ -21,11 +21,48 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 ## ✅ Current Scaffold Status
 - Monorepo folders created for all 6 services.
 - Docker Compose orchestration created with Apple Silicon defaults (`linux/arm64`).
-- Initial runnable scaffolds added for:
-	- `trigger-bg` (BullMQ worker + authenticated enqueue/status/result endpoints)
-	- `dub-links` (basic short-link API)
+- Baseline production hardening applied in compose:
+	- restart policy (`unless-stopped`)
+	- service healthchecks
+	- dependency health-gating where needed
+	- persistent Postgres volume for `dub-links`
+- Current service capabilities:
+	- `trigger-bg` (authenticated enqueue + job lifecycle/status/result APIs)
+	- `dub-links` (persistent Postgres short links + API key auth + redirect analytics)
 	- `pocket-base` (Go + SQLite auth/notes/realtime API)
 	- `paper-cups` (WebSocket chat relay)
 	- `coolify-paas` (PaaS control-plane stub)
 	- `hopp-test` (API testing workspace stub)
+
+## 🧪 How to Test
+
+### 1) Build and start everything
+
+```bash
+docker compose up -d --build
+```
+
+### 2) Check container health
+
+```bash
+docker compose ps
+```
+
+### 3) Run full smoke test (recommended)
+
+```bash
+bash scripts/smoke-test.sh
+```
+
+This verifies health + key workflows for all services:
+- `trigger-bg`: auth enforcement + enqueue + job detail/result
+- `dub-links`: create link + fetch + redirect
+- `pocket-base`: register + login
+- `coolify-paas`, `hopp-test`, `paper-cups`: service endpoints
+
+### 4) View logs if something fails
+
+```bash
+docker compose logs -f
+```
 

@@ -3,6 +3,7 @@ services:
   trigger-bg:
     platform: linux/arm64
     build: ./trigger-bg
+    restart: unless-stopped
     ports: ["3001:3001"]
     depends_on:
       - redis
@@ -11,11 +12,17 @@ services:
       - TRIGGER_API_KEY=change-me
       - TRIGGER_QUEUE_NAME=ai-jobs
       - TRIGGER_WORKER_CONCURRENCY=5
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Link Shortener (Dub-style)
   dub-links:
     platform: linux/arm64
     build: ./dub-links
+    restart: unless-stopped
     ports: ["3000:3000"]
     depends_on:
       db-links:
@@ -24,42 +31,78 @@ services:
       - DATABASE_URL=postgres://postgres:password@db-links:5432/dublinks?sslmode=disable
       - DUB_API_KEY=change-me
       - PUBLIC_BASE_URL=http://localhost:3000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Backend-as-a-Service (PocketBase-style)
   pocket-base:
     platform: linux/arm64
     build: ./pocket-base
+    restart: unless-stopped
     ports: ["8080:8080"]
     volumes:
       - ./pocket-base/pb_data:/pb/pb_data
     environment:
       - JWT_SECRET=change-me
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Real-time Chat (Papercups-style)
   paper-cups:
     platform: linux/arm64
     build: ./paper-cups
+    restart: unless-stopped
     ports: ["4000:4000"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Coolify-style PaaS control plane
   coolify-paas:
     platform: linux/arm64
     build: ./coolify-paas
+    restart: unless-stopped
     ports: ["3002:3002"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3002/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Hoppscotch-style API testing workspace
   hopp-test:
     platform: linux/arm64
     build: ./hopp-test
+    restart: unless-stopped
     ports: ["3003:3003"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3003/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   # Infrastructure Dependencies
   redis:
     platform: linux/arm64
     image: redis:alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   db-links:
     platform: linux/arm64
     image: postgres:alpine
+    restart: unless-stopped
     volumes:
       - db-links-data:/var/lib/postgresql/data
     environment:
