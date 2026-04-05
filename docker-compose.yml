@@ -4,8 +4,13 @@ services:
     platform: linux/arm64
     build: ./trigger-bg
     ports: ["3001:3001"]
+    depends_on:
+      - redis
     environment:
       - REDIS_URL=redis://redis:6379
+      - TRIGGER_API_KEY=change-me
+      - TRIGGER_QUEUE_NAME=ai-jobs
+      - TRIGGER_WORKER_CONCURRENCY=5
 
   # Link Shortener (Dub-style)
   dub-links:

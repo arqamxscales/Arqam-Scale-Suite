@@ -22,7 +22,7 @@ This monorepo is a comprehensive collection of self-hosted services inspired by 
 - Monorepo folders created for all 6 services.
 - Docker Compose orchestration created with Apple Silicon defaults (`linux/arm64`).
 - Initial runnable scaffolds added for:
-	- `trigger-bg` (BullMQ worker + enqueue endpoint)
+	- `trigger-bg` (BullMQ worker + authenticated enqueue/status/result endpoints)
 	- `dub-links` (basic short-link API)
 	- `pocket-base` (Go + SQLite auth/notes/realtime API)
 	- `paper-cups` (WebSocket chat relay)
